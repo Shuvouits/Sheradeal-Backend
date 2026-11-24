@@ -38,6 +38,14 @@ return [
             'report' => false,
         ],
 
+        'uploads' => [
+    'driver' => 'local',
+    'root' => public_path('uploads'),
+    'url' => rtrim(env('APP_URL'), '/') . '/uploads',
+    'visibility' => 'public',
+    'throw' => true,
+],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

@@ -40,16 +40,26 @@ class Slider extends Model
 
     public function getDesktopImageUrlAttribute(): ?string
     {
-        return $this->desktop_image
-            ? Storage::disk('public')->url($this->desktop_image)
-            : null;
+        return $this->getImageUrl($this->desktop_image);
     }
 
     public function getMobileImageUrlAttribute(): ?string
     {
-        return $this->mobile_image
-            ? Storage::disk('public')->url($this->mobile_image)
-            : null;
+        return $this->getImageUrl($this->mobile_image);
+    }
+
+    private function getImageUrl(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        $path = ltrim($path, '/');
+
+        // Handle previously saved storage-prefixed paths.
+        $path = preg_replace('#^(storage/|public/)#', '', $path);
+
+        return Storage::disk('uploads')->url($path);
     }
 
     public function scopeVisible(Builder $query): Builder
