@@ -34,12 +34,28 @@
 /storage/framework/views/*
 !/storage/framework/views/.gitignore
 
-# User-uploaded files
+# Legacy uploaded files
 /storage/app/public/
 /storage/app/private/
 
 # Public storage symbolic link
 /public/storage
+
+# ==========================================
+# Public Image Uploads
+# ==========================================
+
+# Images are uploaded directly to public/uploads
+# Never commit user-uploaded images
+/public/uploads/
+
+# ==========================================
+# Apache / Laravel Rewrite Configuration
+# ==========================================
+
+# Keep Laravel rewrite files in Git
+!/.htaccess
+!/public/.htaccess
 
 # Laravel bootstrap cache
 /bootstrap/cache/*.php
@@ -55,7 +71,6 @@
 /public/mix-manifest.json
 
 # Vite
-/node_modules/
 /dist/
 
 # Testing
