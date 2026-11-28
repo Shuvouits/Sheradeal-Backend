@@ -54,6 +54,11 @@ class CategoryRequest extends FormRequest
                 'boolean',
             ],
 
+            'show_in_megamenu' => [
+    'sometimes',
+    'boolean',
+],
+
             'display_order' => [
                 'sometimes',
                 'integer',

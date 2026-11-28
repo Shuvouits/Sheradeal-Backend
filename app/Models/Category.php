@@ -27,6 +27,7 @@ class Category extends Model
         'tags',
         'created_by',
         'updated_by',
+        'show_in_megamenu',
     ];
 
     protected function casts(): array
@@ -36,6 +37,7 @@ class Category extends Model
             'is_featured' => 'boolean',
             'display_order' => 'integer',
             'tags' => 'array',
+            'show_in_megamenu' => 'boolean',
         ];
     }
 

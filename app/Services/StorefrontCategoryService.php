@@ -48,6 +48,8 @@ class StorefrontCategoryService
             'is_active' => $category->status === 'active',
             'is_featured' => (bool) $category->is_featured,
 
+            'show_in_megamenu' => (bool) $category->show_in_megamenu,
+
             'sort_order' => (int) $category->display_order,
         ];
     }

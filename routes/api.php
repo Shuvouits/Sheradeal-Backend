@@ -36,6 +36,14 @@ use App\Http\Controllers\Api\StorefrontBrandController;
 
 use App\Http\Controllers\Api\StorefrontProductSearchController;
 
+use App\Http\Controllers\Api\CheckoutController;
+use App\Http\Controllers\Api\Admin\OrderController;
+
+use App\Http\Controllers\Api\Admin\OrderWorkflowController;
+use App\Http\Controllers\Api\AbandonedCheckoutController;
+
+
+
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login'])
@@ -77,6 +85,7 @@ Route::middleware(['auth:api', 'admin'])->prefix('admin/categories')->group(func
     Route::get('/{category}', [CategoryController::class, 'show'])->whereNumber('category');
     Route::post('/', [CategoryController::class, 'store']);
     Route::put('/{category}', [CategoryController::class, 'update'])->whereNumber('category');
+    Route::patch('/{category}', [CategoryController::class, 'update'])->whereNumber('category');
     Route::patch('/{category}/featured', [CategoryController::class, 'toggleFeatured'])->whereNumber('category');
     Route::post('/{category}/cover', [CategoryController::class, 'uploadCover'])->whereNumber('category');
     Route::post('/{category}/icon', [CategoryController::class, 'uploadIcon'])->whereNumber('category');
@@ -282,3 +291,69 @@ Route::middleware(['auth:api', 'admin'])
     Route::get('/storefront/brand/{slug}', [StorefrontBrandController::class, 'show']);
 
     Route::get('/storefront/search/products', [StorefrontProductSearchController::class, 'index']);
+
+
+    Route::prefix('storefront')->group(function () {
+    Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:10,1');
+});
+
+Route::middleware('auth:api')
+    ->prefix('user')
+    ->group(function () {
+        Route::get('/orders', [CheckoutController::class, 'myOrders']);
+        Route::get('/orders/{id}', [CheckoutController::class, 'myOrder'])->whereNumber('id');
+    });
+
+Route::middleware(['auth:api', 'admin'])
+    ->prefix('admin/orders')
+    ->group(function () {
+        Route::get('/', [OrderController::class, 'index']);
+        Route::get('/statistics', [OrderController::class, 'statistics']);
+        Route::post('/', [OrderController::class, 'store']);
+        Route::get('/{id}', [OrderController::class, 'show'])->whereNumber('id');
+        Route::patch('/{id}/status', [OrderController::class, 'updateStatus'])->whereNumber('id');
+        Route::patch('/{id}/payment', [OrderController::class, 'confirmPayment'])->whereNumber('id');
+        Route::post('/{id}/notes', [OrderController::class, 'addNote'])->whereNumber('id');
+    });
+
+
+
+    Route::post('/storefront/checkout-progress', [AbandonedCheckoutController::class, 'store'])->middleware('throttle:5,1');
+
+Route::middleware(['auth:api', 'admin'])
+    ->prefix('admin/orders')
+    ->group(function () {
+        Route::get('/products/search', [OrderWorkflowController::class, 'products']);
+
+        Route::get('/preorders', function (\Illuminate\Http\Request $request, OrderWorkflowController $controller) {
+            return $controller->list($request, 'preorders');
+        });
+
+        Route::post('/preorders', [OrderWorkflowController::class, 'createPreorder']);
+        Route::get('/preorders/{id}', [OrderWorkflowController::class, 'preorder'])->whereNumber('id');
+        Route::post('/preorders/{id}/release', [OrderWorkflowController::class, 'releasePreorder'])->whereNumber('id');
+        Route::post('/preorders/{id}/cancel', [OrderWorkflowController::class, 'cancelPreorder'])->whereNumber('id');
+
+        Route::get('/returns', function (\Illuminate\Http\Request $request, OrderWorkflowController $controller) {
+            return $controller->list($request, 'returns');
+        });
+
+        Route::post('/returns', [OrderWorkflowController::class, 'createReturn']);
+        Route::patch('/returns/{id}', [OrderWorkflowController::class, 'updateReturn'])->whereNumber('id');
+
+        Route::get('/quotes', function (\Illuminate\Http\Request $request, OrderWorkflowController $controller) {
+            return $controller->list($request, 'quotes');
+        });
+
+        Route::post('/quotes', [OrderWorkflowController::class, 'createQuote']);
+        Route::get('/quotes/{id}', [OrderWorkflowController::class, 'quote'])->whereNumber('id');
+        Route::patch('/quotes/{id}', [OrderWorkflowController::class, 'updateQuote'])->whereNumber('id');
+        Route::post('/quotes/{id}/convert', [OrderWorkflowController::class, 'convertQuote'])->whereNumber('id');
+
+        Route::get('/abandoned', function (\Illuminate\Http\Request $request, OrderWorkflowController $controller) {
+            return $controller->list($request, 'abandoned');
+        });
+
+        Route::get('/abandoned/{id}', [OrderWorkflowController::class, 'abandoned'])->whereNumber('id');
+        Route::post('/abandoned/{id}/archive', [OrderWorkflowController::class, 'archiveAbandoned'])->whereNumber('id');
+    });
